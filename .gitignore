@@ -1,14 +1,28 @@
-# OS
+# -----------------------
+# Operating System
+# -----------------------
 .DS_Store
+Thumbs.db
 
-# Node
-node_modules
+# -----------------------
+# Node / Frontend
+# -----------------------
+node_modules/
 npm-debug.log
+/dist/
+.vite/
 
-# Laravel
-/vendor
+# -----------------------
+# Laravel / Backend
+# -----------------------
+/vendor/
 .env
 /storage/*.key
+/storage/framework/cache/data/
+storage/logs/
+/bootstrap/cache/
 
-# Build
-/build
+# -----------------------
+# Build / Production
+# -----------------------
+/build/
