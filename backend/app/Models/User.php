@@ -21,6 +21,15 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'company_id',
+        'bio',
+        'skills',
+        'phone',
+        'location',
+        'default_resume_url',
+        'portfolio_url',
+        'linkedin_url',
     ];
 
     /**
@@ -42,4 +51,15 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    // Relationships
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class);
+    }
 }
