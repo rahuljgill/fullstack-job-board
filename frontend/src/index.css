@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand: #14b8a6;
   --color-brand-dark: #be123c;
   --color-text-primary: #404145;
   --color-ui-light: #f8f8f8;
+
+  /* Dark mode colors */
+  --color-dark-bg: #1a1a1a;
+  --color-dark-text: #e5e5e5;
+  --color-dark-border: #333333;
 }

@@ -20,13 +20,19 @@ export default function JobList() {
   }, []);
 
   if (loading) {
-    return <p className="text-center mt-12 text-gray-500">Loading jobs...</p>;
+    return (
+      <p className="text-center mt-12 text-gray-500 dark:text-gray-400">
+        Loading jobs...
+      </p>
+    );
   }
 
   return (
     <section className="max-w-6xl mx-auto px-6 py-16">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Latest Jobs</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Latest Jobs
+        </h2>
 
         <Link to="/jobs" className="text-brand font-medium hover:underline">
           View all jobs →

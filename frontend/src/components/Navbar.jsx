@@ -1,12 +1,22 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Dropdown from "./Dropdown";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Enable dark mode
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [darkMode]);
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       <div className="relative max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Left side*/}
         <div className="flex items-center gap-4">
@@ -16,13 +26,16 @@ export default function Navbar() {
             aria-label="Toggle menu"
             className="flex flex-col justify-between h-5 w-6 group"
           >
-            <span className="block h-0.5 w-full bg-text-primary group-hover:bg-brand transition-colors duration-200"></span>
-            <span className="block h-0.5 w-full bg-text-primary group-hover:bg-brand transition-colors duration-200"></span>
-            <span className="block h-0.5 w-full bg-text-primary group-hover:bg-brand transition-colors duration-200"></span>
+            <span className="block h-0.5 w-full bg-text-primary dark:bg-white group-hover:bg-brand dark:group-hover:bg-brand transition-colors duration-200"></span>
+            <span className="block h-0.5 w-full bg-text-primary dark:bg-white group-hover:bg-brand dark:group-hover:bg-brand transition-colors duration-200"></span>
+            <span className="block h-0.5 w-full bg-text-primary dark:bg-white group-hover:bg-brand dark:group-hover:bg-brand transition-colors duration-200"></span>
           </button>
 
           {/* Logo */}
-          <Link to="/" className="text-xl font-bold text-brand">
+          <Link
+            to="/"
+            className="text-xl font-bold text-brand dark:text-brand "
+          >
             JobBoard
           </Link>
         </div>
@@ -31,7 +44,7 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           <Link
             to="/login"
-            className="text-text-primary hover:text-brand transition-colors duration-200"
+            className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand transition-colors duration-200"
           >
             Login
           </Link>
@@ -42,8 +55,22 @@ export default function Navbar() {
           >
             Register
           </Link>
+
+          {/* Dark Mode Toggle Button */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            aria-label="Toggle Dark Mode"
+            className="ml-2 w-10 h-5 bg-gray-300 dark:bg-gray-600 rounded-full relative flex items-center px-1 cursor-pointer "
+          >
+            <span
+              className={`w-4 h-4 bg-white dark:bg-gray-900 rounded-full shadow-md transform transition-transform duration-300 ${
+                darkMode ? "translate-x-4" : "translate-x-0"
+              }`}
+            ></span>
+          </button>
         </div>
 
+        {/* Dropdown menu */}
         <Dropdown isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
       </div>
     </nav>
