@@ -9,7 +9,7 @@ export default function Dropdown({ isOpen, onClose }) {
         <Link
           to="/jobs"
           onClick={onClose}
-          className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand transition-colors duration-200"
+          className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand "
         >
           Browse Jobs
         </Link>
@@ -17,7 +17,7 @@ export default function Dropdown({ isOpen, onClose }) {
         <Link
           to="/post-job"
           onClick={onClose}
-          className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand transition-colors duration-200"
+          className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand "
         >
           Post a Job
         </Link>
@@ -25,7 +25,7 @@ export default function Dropdown({ isOpen, onClose }) {
         <Link
           to="/about"
           onClick={onClose}
-          className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand transition-colors duration-200"
+          className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand "
         >
           About
         </Link>

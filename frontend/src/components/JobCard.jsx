@@ -1,11 +1,18 @@
+import { useNavigate } from "react-router-dom";
+
 export default function JobCard({ job }) {
+  const navigate = useNavigate();
+
   const postedDate = new Date(job.created_at);
   const now = new Date();
   const diffTime = Math.abs(now - postedDate);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 grid grid-rows-[1fr_auto] transition hover:-translate-y-1 hover:shadow-md h-full">
+    <div
+      onClick={() => navigate(`/job/${job.id}`)}
+      className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 grid grid-rows-[1fr_auto] hover:-translate-y-1 hover:shadow-md h-full cursor-pointer"
+    >
       {/* Main content */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
