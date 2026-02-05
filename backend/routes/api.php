@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\JobController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,10 +20,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::get('/test', function () {
-    return response()->json([
-        ['id' => 1, 'title' => 'Software Engineer', 'company' => 'Tech Corp'],
-        ['id' => 2, 'title' => 'Data Analyst', 'company' => 'Data Inc'],
-        ['id' => 3, 'title' => 'Product Manager', 'company' => 'Business Solutions'],
-    ]);
-});
+Route::get('/jobs', [JobController::class, 'index']);
