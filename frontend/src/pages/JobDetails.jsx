@@ -72,7 +72,7 @@ export default function JobDetails() {
         </div>
 
         <div className="flex justify-end">
-          <button className="px-8 py-3 bg-brand text-white font-semibold rounded-md hover:bg-brand-dark">
+          <button className="px-8 py-3 my-3 bg-brand text-white font-semibold rounded-md hover:bg-brand-dark">
             Apply Now
           </button>
         </div>
