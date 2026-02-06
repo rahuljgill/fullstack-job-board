@@ -9,7 +9,7 @@ export default function JobDetails() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/jobs/${id}`)
+    fetch(`http://localhost:8000/api/jobs/${id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Job not found");
         return res.json();

@@ -19,7 +19,7 @@ export default function Jobs() {
   const [days, setDays] = useState(searchParams.get("days") || "");
 
   useEffect(() => {
-    const url = `http://127.0.0.1:8000/api/jobs?${searchParams.toString()}`;
+    const url = `http://localhost:8000/api/jobs?${searchParams.toString()}`;
 
     setLoading(true);
     fetch(url)

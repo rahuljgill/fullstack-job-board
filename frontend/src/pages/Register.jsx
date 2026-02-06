@@ -37,7 +37,7 @@ export default function Register() {
 
     try {
       // Get CSRF token
-      await fetch("http://127.0.0.1:8000/sanctum/csrf-cookie", {
+      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
         credentials: "include",
       });
 
@@ -56,7 +56,7 @@ export default function Register() {
         body.company_description = companyDescription;
       }
 
-      const res = await fetch("http://127.0.0.1:8000/api/register", {
+      const res = await fetch("http://localhost:8000/api/register", {
         method: "POST",
         credentials: "include",
         headers: {
