@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import { getXSRFToken } from "../utils/cookies";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -9,7 +10,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { checkAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -21,11 +22,35 @@ export default function Login() {
     setLoading(true);
 
     try {
-      await login(email, password);
+      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
+        credentials: "include",
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const xsrfToken = getXSRFToken();
+
+      const res = await fetch("http://localhost:8000/api/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-XSRF-TOKEN": xsrfToken,
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Login failed");
+      }
+
+      await checkAuth(); // Update the auth context
 
       navigate("/");
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(err.message);
     } finally {
       setLoading(false);
     }

@@ -31,7 +31,11 @@ class Kernel extends HttpKernel
     protected $middlewareGroups = [
     'api' => [
         \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-        \Illuminate\Session\Middleware\StartSession::class, // ✅ Required for SPA auth
+        \App\Http\Middleware\EncryptCookies::class, // ADD THIS
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class, // ADD THIS
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class, // ADD THIS
+        \App\Http\Middleware\VerifyCsrfToken::class, // ADD THIS
         'throttle:api',
         \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ],

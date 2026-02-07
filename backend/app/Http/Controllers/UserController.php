@@ -86,4 +86,26 @@ public function me(Request $request)
         'user' => $request->user()
     ]);
 }
+
+
+public function updateProfile(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'bio' => 'nullable|string',
+        'skills' => 'nullable|string',
+        'phone' => 'nullable|string|max:20',
+        'location' => 'nullable|string|max:255',
+        'portfolio_url' => 'nullable|url',
+        'linkedin_url' => 'nullable|url',
+    ]);
+
+    $user = $request->user();
+    $user->update($validated);
+
+    return response()->json([
+        'message' => 'Profile updated successfully',
+        'user' => $user
+    ]);
+}
 }
