@@ -35,5 +35,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [UserController::class, 'logout']);
     Route::get('/me', [UserController::class, 'me']);
-    Route::patch('/profile', [UserController::class, 'updateProfile']);
+    Route::post('/profile', [UserController::class, 'updateProfile']);
+    Route::delete('/profile/resume', [UserController::class, 'deleteResume']);
+    Route::get('/applications', [ApplicationController::class, 'index']);
 });

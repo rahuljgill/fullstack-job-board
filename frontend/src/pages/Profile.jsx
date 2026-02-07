@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import { getXSRFToken } from "../utils/cookies";
+import AppliedJobs from "../components/AppliedJobs";
 
 export default function Profile() {
   const { user, loading, checkAuth } = useAuth();
@@ -16,9 +17,11 @@ export default function Profile() {
     portfolio_url: "",
     linkedin_url: "",
   });
+  const [resumeFile, setResumeFile] = useState(null);
   const [updateError, setUpdateError] = useState("");
   const [updateSuccess, setUpdateSuccess] = useState("");
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -42,6 +45,7 @@ export default function Profile() {
 
   const handleCancel = () => {
     setIsEditing(false);
+    setResumeFile(null);
     // Reset form to current user data
     setFormData({
       name: user.name || "",
@@ -76,15 +80,27 @@ export default function Profile() {
 
       const xsrfToken = getXSRFToken();
 
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("bio", formData.bio);
+      formDataToSend.append("skills", formData.skills);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("location", formData.location);
+      formDataToSend.append("portfolio_url", formData.portfolio_url);
+      formDataToSend.append("linkedin_url", formData.linkedin_url);
+
+      if (resumeFile) {
+        formDataToSend.append("resume", resumeFile);
+      }
+
       const res = await fetch("http://localhost:8000/api/profile", {
-        method: "PATCH",
+        method: "POST",
         credentials: "include",
         headers: {
-          "Content-Type": "application/json",
           Accept: "application/json",
           "X-XSRF-TOKEN": xsrfToken,
         },
-        body: JSON.stringify(formData),
+        body: formDataToSend,
       });
 
       const data = await res.json();
@@ -99,12 +115,51 @@ export default function Profile() {
 
       setUpdateSuccess("Profile updated successfully!");
       setIsEditing(false);
+      setResumeFile(null);
 
       await checkAuth();
     } catch (err) {
       setUpdateError(err.message);
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleDeleteResume = async () => {
+    setDeleting(true);
+    setUpdateError("");
+    setUpdateSuccess("");
+
+    try {
+      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
+        credentials: "include",
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const xsrfToken = getXSRFToken();
+
+      const res = await fetch("http://localhost:8000/api/profile/resume", {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "X-XSRF-TOKEN": xsrfToken,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Delete failed");
+      }
+
+      setUpdateSuccess("Resume deleted successfully!");
+      await checkAuth();
+    } catch (err) {
+      setUpdateError(err.message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -266,6 +321,34 @@ export default function Profile() {
                   )}
                 </p>
               </div>
+
+              {/* Resume Section in View Mode */}
+              <div>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                  Resume
+                </p>
+                {user.default_resume_url ? (
+                  <div className="flex items-center gap-4">
+                    <a
+                      href={`http://localhost:8000/storage/${user.default_resume_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand hover:underline"
+                    >
+                      Your Current Resume →
+                    </a>
+                    <button
+                      onClick={handleDeleteResume}
+                      disabled={deleting}
+                      className="px-4 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {deleting ? "Deleting..." : "Delete"}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-gray-900 dark:text-white">Not provided</p>
+                )}
+              </div>
             </div>
           ) : (
             // Edit Mode
@@ -372,6 +455,51 @@ export default function Profile() {
                 />
               </div>
 
+              {/* Resume Upload */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Upload Resume (PDF, max 5MB)
+                </label>
+
+                {user.default_resume_url && !resumeFile && (
+                  <div className="mb-2">
+                    <a
+                      href={`http://localhost:8000/storage/${user.default_resume_url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand hover:underline text-sm"
+                    >
+                      View current resume →
+                    </a>
+                  </div>
+                )}
+
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      // Must be less than 5MB
+                      if (file.size > 5 * 1024 * 1024) {
+                        setUpdateError("Resume must be less than 5MB");
+                        e.target.value = null;
+                        return;
+                      }
+                      setResumeFile(file);
+                      setUpdateError("");
+                    }
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+
+                {resumeFile && (
+                  <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                    Selected: {resumeFile.name}
+                  </p>
+                )}
+              </div>
+
               {/* Buttons */}
               <div className="flex gap-4">
                 <button
@@ -393,6 +521,9 @@ export default function Profile() {
             </form>
           )}
         </div>
+
+        {/* Applied Jobs - Only for job seekers */}
+        {user.role === "job_seeker" && <AppliedJobs />}
       </div>
     </div>
   );

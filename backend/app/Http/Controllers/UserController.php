@@ -7,6 +7,7 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -88,6 +89,8 @@ public function me(Request $request)
 }
 
 
+
+
 public function updateProfile(Request $request)
 {
     $validated = $request->validate([
@@ -98,14 +101,45 @@ public function updateProfile(Request $request)
         'location' => 'nullable|string|max:255',
         'portfolio_url' => 'nullable|url',
         'linkedin_url' => 'nullable|url',
+        'resume' => 'nullable|file|mimes:pdf|max:5120', // 5MB
     ]);
 
     $user = $request->user();
+
+    
+    if ($request->hasFile('resume')) {
+        // Delete old resume if exists
+        if ($user->default_resume_url) {
+            Storage::disk('public')->delete($user->default_resume_url);
+        }
+
+       
+        $path = $request->file('resume')->store('resumes', 'public');
+        $validated['default_resume_url'] = $path;
+    }
+
     $user->update($validated);
 
     return response()->json([
         'message' => 'Profile updated successfully',
         'user' => $user
     ]);
+}
+
+public function deleteResume(Request $request)
+{
+    $user = $request->user();
+
+    if (!$user->default_resume_url) {
+        return response()->json(['message' => 'No resume to delete'], 404);
+    }
+
+    
+    Storage::disk('public')->delete($user->default_resume_url);
+
+    // Clear database field
+    $user->update(['default_resume_url' => null]);
+
+    return response()->json(['message' => 'Resume deleted successfully']);
 }
 }
