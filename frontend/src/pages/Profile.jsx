@@ -335,7 +335,7 @@ export default function Profile() {
                       rel="noopener noreferrer"
                       className="text-brand hover:underline"
                     >
-                      Your Current Resume →
+                      View Current Resume
                     </a>
                     <button
                       onClick={handleDeleteResume}

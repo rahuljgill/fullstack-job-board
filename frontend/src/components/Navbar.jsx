@@ -5,16 +5,21 @@ import Dropdown from "./Dropdown";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    return saved === "true";
+  });
 
   const { user, logout } = useAuth();
 
-  // Enable dark mode
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
+      localStorage.setItem("darkMode", "true");
     } else {
       document.documentElement.classList.remove("dark");
+      localStorage.setItem("darkMode", "false");
     }
   }, [darkMode]);
 
@@ -49,15 +54,11 @@ export default function Navbar() {
           {user ? (
             <>
               {/* Logged in - show Profile and Logout */}
-              <span className="text-text-primary dark:text-gray-200">
-                Hi, {user.name}!
-              </span>
-
               <Link
                 to="/profile"
                 className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand"
               >
-                Profile
+                Hi, {user.name}!
               </Link>
 
               <button
