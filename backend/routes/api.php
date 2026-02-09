@@ -45,6 +45,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/jobs', [JobController::class, 'store']);
     Route::get('/my-jobs', [JobController::class, 'myJobs']);
     Route::get('/jobs/{jobId}/applications', [ApplicationController::class, 'getJobApplications']);
+    Route::put('/jobs/{id}', [JobController::class, 'update']);
+    Route::patch('/jobs/{id}/close', [JobController::class, 'closeJob']);
 
 
 

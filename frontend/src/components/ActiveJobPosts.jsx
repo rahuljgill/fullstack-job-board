@@ -35,7 +35,7 @@ export default function ActiveJobPosts() {
     return (
       <div className="max-w-6xl mx-auto px-6 py-16">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          Your Active Job Posts
+          Your Previous Job Posts
         </h2>
         <p className="text-gray-500 dark:text-gray-400">Loading...</p>
       </div>
@@ -47,7 +47,7 @@ export default function ActiveJobPosts() {
       <div className="flex justify-between items-center mb-6">
         <div className="w-full">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white text-center">
-            Your Active Job Posts
+            Your Previous Job Posts
           </h2>
         </div>
       </div>
@@ -69,8 +69,14 @@ export default function ActiveJobPosts() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {job.title}
                 </h3>
-                <span className="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 rounded-full">
-                  Active
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    job.status === "closed"
+                      ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400"
+                      : "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
+                  }`}
+                >
+                  {job.status === "closed" ? "Closed" : "Active"}
                 </span>
               </div>
 

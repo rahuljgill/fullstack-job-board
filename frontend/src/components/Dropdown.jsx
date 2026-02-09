@@ -51,14 +51,6 @@ export default function Dropdown({ isOpen, onClose }) {
             </Link>
 
             <Link
-              to="/applicants"
-              onClick={onClose}
-              className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand"
-            >
-              Manage Applicants
-            </Link>
-
-            <Link
               to="/employer-profile"
               onClick={onClose}
               className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand"

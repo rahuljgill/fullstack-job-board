@@ -12,6 +12,9 @@ class JobController extends Controller
 {
     $query = Job::with('company');
 
+   
+    $query->where('status', 'active');
+
     // Filter by location
     if ($request->has('location')) {
         $query->where('location', 'like', '%' . $request->location . '%');
@@ -109,6 +112,63 @@ public function myJobs(Request $request)
 
     return response()->json([
         'jobs' => $jobs
+    ]);
+}
+
+public function update(Request $request, $id)
+{
+    $user = $request->user();
+
+    
+    if ($user->role !== 'company_admin') {
+        return response()->json(['message' => 'Only company admins can update jobs'], 403);
+    }
+
+    $job = Job::findOrFail($id);
+
+    
+    if ($job->company_id !== $user->company_id) {
+        return response()->json(['message' => 'You can only update your own jobs'], 403);
+    }
+
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'location' => 'required|string|max:255',
+        'salary_min' => 'nullable|numeric|min:0',
+        'salary_max' => 'nullable|numeric|min:0',
+        'employment_type' => 'nullable|string|max:100',
+    ]);
+
+    $job->update($validated);
+
+    $job->load('company'); 
+
+    return response()->json([
+        'message' => 'Job updated successfully',
+        'job' => $job
+    ]);
+}
+
+public function closeJob(Request $request, $id)
+{
+    $user = $request->user();
+
+    if ($user->role !== 'company_admin') {
+        return response()->json(['message' => 'Only company admins can close jobs'], 403);
+    }
+
+    $job = Job::findOrFail($id);
+
+    if ($job->company_id !== $user->company_id) {
+        return response()->json(['message' => 'You can only close your own jobs'], 403);
+    }
+
+    $job->update(['status' => 'closed']);
+
+    return response()->json([
+        'message' => 'Job closed successfully',
+        'job' => $job
     ]);
 }
 }

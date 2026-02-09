@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import ApplyModal from "../components/ApplyModal";
+import { getXSRFToken } from "../utils/cookies";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -15,85 +16,204 @@ export default function JobDetails() {
   const [hasApplied, setHasApplied] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
 
+  // Company admin state
   const [applications, setApplications] = useState([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [isMyJob, setIsMyJob] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    title: "",
+    description: "",
+    location: "",
+    salary_min: "",
+    salary_max: "",
+    employment_type: "",
+  });
+  const [updating, setUpdating] = useState(false);
+  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
-    const fetchJob = async () => {
-      try {
-        const res = await fetch(`http://localhost:8000/api/jobs/${id}`);
-        if (!res.ok) throw new Error("Job not found");
-        const data = await res.json();
-        setJob(data);
-
-        // Check if this job has been created by logged-in company admin
-        if (
-          user &&
-          user.role === "company_admin" &&
-          user.company_id === data.company_id
-        ) {
-          setIsMyJob(true);
-          fetchApplications();
-        }
-
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch job", err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    const checkIfApplied = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:8000/api/applications/check/${id}`,
-          {
-            credentials: "include",
-            headers: { Accept: "application/json" },
-          },
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setHasApplied(data.has_applied);
-        }
-      } catch (err) {
-        console.error("Failed to check application status", err);
-      }
-    };
-
-    const fetchApplications = async () => {
-      setLoadingApplications(true);
-      try {
-        const res = await fetch(
-          `http://localhost:8000/api/jobs/${id}/applications`,
-          {
-            credentials: "include",
-            headers: { Accept: "application/json" },
-          },
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setApplications(data.applications);
-        }
-      } catch (err) {
-        console.error("Failed to fetch applications", err);
-      } finally {
-        setLoadingApplications(false);
-      }
-    };
-
     fetchJob();
     if (user && user.role === "job_seeker") {
       checkIfApplied();
     }
   }, [id, user]);
 
+  const fetchJob = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/jobs/${id}`);
+      if (!res.ok) throw new Error("Job not found");
+      const data = await res.json();
+      setJob(data);
+
+      // Set edit form data
+      setEditFormData({
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        salary_min: data.salary_min || "",
+        salary_max: data.salary_max || "",
+        employment_type: data.employment_type || "",
+      });
+
+      // Check if this is the company admin's job
+      if (
+        user &&
+        user.role === "company_admin" &&
+        user.company_id === data.company_id
+      ) {
+        setIsMyJob(true);
+        fetchApplications();
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Failed to fetch job", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const checkIfApplied = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/applications/check/${id}`,
+        {
+          credentials: "include",
+          headers: { Accept: "application/json" },
+        },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setHasApplied(data.has_applied);
+      }
+    } catch (err) {
+      console.error("Failed to check application status", err);
+    }
+  };
+
+  const fetchApplications = async () => {
+    setLoadingApplications(true);
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/jobs/${id}/applications`,
+        {
+          credentials: "include",
+          headers: { Accept: "application/json" },
+        },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setApplications(data.applications);
+      }
+    } catch (err) {
+      console.error("Failed to fetch applications", err);
+    } finally {
+      setLoadingApplications(false);
+    }
+  };
+
   const handleApplySuccess = () => {
     setHasApplied(true);
     setSuccessMessage("Application submitted successfully!");
     setTimeout(() => setSuccessMessage(""), 5000);
+  };
+
+  const handleEditChange = (e) => {
+    setEditFormData({
+      ...editFormData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleUpdateJob = async (e) => {
+    e.preventDefault();
+    setUpdating(true);
+    setError("");
+
+    try {
+      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
+        credentials: "include",
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const xsrfToken = getXSRFToken();
+
+      const res = await fetch(`http://localhost:8000/api/jobs/${id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-XSRF-TOKEN": xsrfToken,
+        },
+        body: JSON.stringify(editFormData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to update job");
+      }
+
+      setJob(data.job);
+      setIsEditing(false);
+      setSuccessMessage("Job updated successfully!");
+      setTimeout(() => setSuccessMessage(""), 5000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleCloseJob = async () => {
+    setClosing(true);
+    setError("");
+
+    try {
+      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
+        credentials: "include",
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const xsrfToken = getXSRFToken();
+
+      const res = await fetch(`http://localhost:8000/api/jobs/${id}/close`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "X-XSRF-TOKEN": xsrfToken,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to close job");
+      }
+
+      setJob(data.job);
+      setSuccessMessage("Job closed successfully!");
+      setTimeout(() => setSuccessMessage(""), 5000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setClosing(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditFormData({
+      title: job.title,
+      description: job.description,
+      location: job.location,
+      salary_min: job.salary_min || "",
+      salary_max: job.salary_max || "",
+      employment_type: job.employment_type || "",
+    });
   };
 
   if (loading) {
@@ -129,54 +249,217 @@ export default function JobDetails() {
           </div>
         )}
 
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {job.title}
-        </h1>
-        <p className="text-brand text-xl font-medium mb-4">
-          {job.company?.name}
-        </p>
-        <p className="text-gray-600 dark:text-gray-400 mb-6">{job.location}</p>
-
-        {job.salary_min && job.salary_max && (
-          <p className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-6">
-            £{job.salary_min} – £{job.salary_max}
-          </p>
-        )}
-
-        <div className="prose dark:prose-invert mb-8">
-          <h2 className="text-xl font-semibold mb-3">Job Description</h2>
-          <p>{job.description || "No description available."}</p>
-        </div>
-
-        {/* JOB SEEKER VIEW - Apply Button */}
-        {!isMyJob && (
-          <div className="flex justify-end">
-            {user && user.role === "job_seeker" ? (
-              <button
-                onClick={() => setModalOpen(true)}
-                disabled={hasApplied}
-                className={`px-8 py-3 font-semibold rounded-md ${
-                  hasApplied
-                    ? "bg-gray-400 cursor-not-allowed text-white"
-                    : "bg-brand text-white hover:bg-brand-dark"
-                }`}
-              >
-                {hasApplied ? "Already Applied" : "Apply Now"}
-              </button>
-            ) : user && user.role === "company_admin" ? (
-              <p className="text-gray-500 dark:text-gray-400 italic">
-                Company admins cannot apply to jobs
-              </p>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 italic">
-                Please log in to apply
-              </p>
-            )}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md text-red-600 dark:text-red-400">
+            {error}
           </div>
         )}
 
+        {/* Job Status Badge */}
+        {job.status === "closed" && (
+          <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md">
+            <p className="text-gray-700 dark:text-gray-300 font-medium">
+              This job posting is closed and no longer accepting applications.
+            </p>
+          </div>
+        )}
+
+        {/* Edit Mode */}
+        {isEditing ? (
+          <form
+            onSubmit={handleUpdateJob}
+            className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 mb-8 space-y-4"
+          >
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              Edit Job Posting
+            </h2>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Job Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                required
+                value={editFormData.title}
+                onChange={handleEditChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Description
+              </label>
+              <textarea
+                name="description"
+                required
+                rows="8"
+                value={editFormData.description}
+                onChange={handleEditChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                required
+                value={editFormData.location}
+                onChange={handleEditChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                Employment Type
+              </label>
+              <select
+                name="employment_type"
+                value={editFormData.employment_type}
+                onChange={handleEditChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="">Select type (optional)</option>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Minimum Salary (£)
+                </label>
+                <input
+                  type="number"
+                  name="salary_min"
+                  value={editFormData.salary_min}
+                  onChange={handleEditChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
+                  Maximum Salary (£)
+                </label>
+                <input
+                  type="number"
+                  name="salary_max"
+                  value={editFormData.salary_max}
+                  onChange={handleEditChange}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                type="submit"
+                disabled={updating}
+                className="px-6 py-2 bg-brand text-white rounded-md hover:bg-brand-dark disabled:bg-gray-400"
+              >
+                {updating ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="px-6 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-md hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          /* View Mode */
+          <>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              {job.title}
+            </h1>
+            <p className="text-brand text-xl font-medium mb-4">
+              {job.company?.name}
+            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {job.location}
+            </p>
+
+            {job.salary_min && job.salary_max && (
+              <p className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-6">
+                £{job.salary_min.toLocaleString()} – £
+                {job.salary_max.toLocaleString()}
+              </p>
+            )}
+
+            <div className="prose dark:prose-invert mb-8">
+              <h2 className="text-xl font-semibold mb-3">Job Description</h2>
+              <p className="whitespace-pre-wrap wrap-break-word">
+                {job.description || "No description available."}
+              </p>
+            </div>
+
+            {/* Company Admin Actions */}
+            {isMyJob && (
+              <div className="mb-8 flex justify-start gap-3">
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                >
+                  Edit Job
+                </button>
+                <button
+                  onClick={handleCloseJob}
+                  disabled={closing || job.status === "closed"}
+                  className="px-6 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                >
+                  {closing
+                    ? "Closing..."
+                    : job.status === "closed"
+                      ? " Job Closed"
+                      : " Close Job"}
+                </button>
+              </div>
+            )}
+
+            {/* JOB SEEKER VIEW - Apply Button */}
+            {!isMyJob && job.status === "open" && (
+              <div className="flex justify-end">
+                {user && user.role === "job_seeker" ? (
+                  <button
+                    onClick={() => setModalOpen(true)}
+                    disabled={hasApplied}
+                    className={`px-8 py-3 font-semibold rounded-md ${
+                      hasApplied
+                        ? "bg-gray-400 cursor-not-allowed text-white"
+                        : "bg-brand text-white hover:bg-brand-dark"
+                    }`}
+                  >
+                    {hasApplied ? "Already Applied" : "Apply Now"}
+                  </button>
+                ) : user && user.role === "company_admin" ? (
+                  <p className="text-gray-500 dark:text-gray-400 italic">
+                    Company admins cannot apply to jobs
+                  </p>
+                ) : (
+                  <p className="text-gray-500 dark:text-gray-400 italic">
+                    Please log in to apply
+                  </p>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
         {/* COMPANY ADMIN VIEW - Applications List */}
-        {isMyJob && (
+        {isMyJob && !isEditing && (
           <div className="mt-12">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
               Applications ({applications.length})
@@ -210,9 +493,10 @@ export default function JobDetails() {
                       </div>
                       <span
                         className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          app.status === "applied"
+                          app.status === "applied" || app.status === "reviewing"
                             ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400"
-                            : app.status === "accepted"
+                            : app.status === "accepted" ||
+                                app.status === "shortlisted"
                               ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400"
                               : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400"
                         }`}
@@ -239,7 +523,7 @@ export default function JobDetails() {
                         <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                           Cover Letter:
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap">
                           {app.cover_letter}
                         </p>
                       </div>
