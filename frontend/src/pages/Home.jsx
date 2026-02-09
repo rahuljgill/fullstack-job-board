@@ -1,10 +1,17 @@
 import Navbar from "../components/Navbar";
 import JobList from "../components/JobList";
 import stockVideo from "../assets/Stock.mp4";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import ActiveJobPosts from "../components/ActiveJobPosts";
 
 export default function Home() {
+  const { user } = useAuth();
+
+  const isCompanyAdmin = user?.role === "company_admin";
+
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-text-primary dark:text-gray-200 ">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 text-text-primary dark:text-gray-200">
       {/* Navbar */}
       <Navbar />
 
@@ -25,11 +32,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Latest Jobs */}
-      <JobList />
+      {/* Employer CTA (below hero) */}
+      {isCompanyAdmin && (
+        <section className="bg-gray-50 dark:bg-gray-800 py-10">
+          <div className="max-w-6xl mx-auto px-6 text-center">
+            <h2 className="text-2xl font-semibold mb-4">
+              Ready to hire your next candidate?
+            </h2>
+            <Link
+              to="/post-job"
+              className="inline-block px-8 py-3 bg-brand text-white font-semibold rounded-md hover:bg-brand-dark transition-colors"
+            >
+              Post a Job
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* Active Job Posts (for company admins) */}
+      {isCompanyAdmin && <ActiveJobPosts />}
+
+      {/* Job Listings (only for non-employers) */}
+      {!isCompanyAdmin && <JobList />}
 
       {/* Footer */}
-      <footer className="mt-auto bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 py-6 ">
+      <footer className="mt-auto bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 py-6">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm">
             &copy; {new Date().getFullYear()} rahuljgill. All rights reserved.

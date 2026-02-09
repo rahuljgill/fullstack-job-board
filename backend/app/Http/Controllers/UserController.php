@@ -74,7 +74,7 @@ class UserController extends Controller
 
 public function logout(Request $request)
 {
-    Auth::logout();
+    Auth::guard('web')->logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
 
@@ -83,8 +83,15 @@ public function logout(Request $request)
 
 public function me(Request $request)
 {
+    $user = $request->user();
+    
+    // Load company relationship for company admins
+    if ($user->role === 'company_admin') {
+        $user->load('company');
+    }
+    
     return response()->json([
-        'user' => $request->user()
+        'user' => $user
     ]);
 }
 

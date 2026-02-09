@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { getXSRFToken } from "../utils/cookies";
 
 const AuthContext = createContext();
 
@@ -63,13 +64,31 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await fetch("http://localhost:8000/api/logout", {
-      method: "POST",
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
+    try {
+      // Get fresh CSRF token before logout
+      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
+        credentials: "include",
+      });
 
-    setUser(null);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const xsrfToken = getXSRFToken();
+
+      await fetch("http://localhost:8000/api/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          Accept: "application/json",
+          "X-XSRF-TOKEN": xsrfToken,
+        },
+      });
+
+      setUser(null);
+    } catch (error) {
+      console.error("Logout failed", error);
+
+      setUser(null);
+    }
   };
 
   return (

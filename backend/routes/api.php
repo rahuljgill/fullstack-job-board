@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\EmployerProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/applications', [ApplicationController::class, 'index']);
     Route::post('/applications', [ApplicationController::class, 'store']);
     Route::get('/applications/check/{jobId}', [ApplicationController::class, 'checkIfApplied']);
+    Route::post('/employer/profile', [EmployerProfileController::class, 'updateProfile']);
+    Route::post('/jobs', [JobController::class, 'store']);
+    Route::get('/my-jobs', [JobController::class, 'myJobs']);
 
 
 

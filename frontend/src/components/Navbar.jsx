@@ -55,7 +55,9 @@ export default function Navbar() {
             <>
               {/* Logged in - show Profile and Logout */}
               <Link
-                to="/profile"
+                to={
+                  user.role === "job_seeker" ? "/profile" : "/employer-profile"
+                }
                 className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand"
               >
                 Hi, {user.name}!

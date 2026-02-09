@@ -57,4 +57,58 @@ class JobController extends Controller
 
         return response()->json($job);
     }
+
+    public function store(Request $request)
+{
+    $user = $request->user();
+
+    
+    if ($user->role !== 'company_admin') {
+        return response()->json(['message' => 'Only company admins can post jobs'], 403);
+    }
+
+    
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'location' => 'required|string|max:255',
+        'salary_min' => 'nullable|integer|min:0',
+        'salary_max' => 'nullable|integer|min:0',
+        'employment_type' => 'nullable|string|in:Full-time,Part-time,Contract,Internship',
+    ]);
+
+    
+    $job = Job::create([
+        'company_id' => $user->company_id,
+        'title' => $validated['title'],
+        'description' => $validated['description'],
+        'location' => $validated['location'],
+        'salary_min' => $validated['salary_min'],
+        'salary_max' => $validated['salary_max'],
+        'employment_type' => $validated['employment_type'],
+    ]);
+
+    return response()->json([
+        'message' => 'Job posted successfully',
+        'job' => $job
+    ], 201);
+}
+
+public function myJobs(Request $request)
+{
+    $user = $request->user();
+
+    if ($user->role !== 'company_admin') {
+        return response()->json(['message' => 'Only company admins can view their jobs'], 403);
+    }
+
+    $jobs = Job::where('company_id', $user->company_id)
+        ->withCount('applications') // Count how many applicants per job
+        ->latest()
+        ->get();
+
+    return response()->json([
+        'jobs' => $jobs
+    ]);
+}
 }

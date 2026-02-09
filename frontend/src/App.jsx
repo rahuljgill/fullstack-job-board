@@ -7,6 +7,8 @@ import Jobs from "./pages/Jobs";
 import Profile from "./pages/Profile";
 import GuestRoute from "./components/GuestRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
+import EmployerProfile from "./pages/EmployerProfile";
+import PostJob from "./pages/PostJob";
 
 function App() {
   return (
@@ -35,6 +37,23 @@ function App() {
         element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employer-profile"
+        element={
+          <ProtectedRoute>
+            <EmployerProfile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/post-job"
+        element={
+          <ProtectedRoute>
+            <PostJob />
           </ProtectedRoute>
         }
       />
