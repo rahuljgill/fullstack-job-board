@@ -16,7 +16,7 @@ export default function Home() {
       <Navbar />
 
       {/* Hero */}
-      <section className="relative w-full h-[350px] overflow-hidden">
+      <section className="relative w-full h-87.5 overflow-hidden">
         <video
           className="absolute top-0 left-0 w-full h-full object-cover"
           src={stockVideo}

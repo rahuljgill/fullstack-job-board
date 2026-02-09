@@ -92,4 +92,33 @@ public function checkIfApplied(Request $request, $jobId)
 
         return response()->json(['has_applied' => $hasApplied]);
     }
+
+
+    public function getJobApplications(Request $request, $jobId)
+{
+    $user = $request->user();
+
+    
+    if ($user->role !== 'company_admin') {
+        return response()->json(['message' => 'Only company admins can view applications'], 403);
+    }
+
+    
+    $job = \App\Models\Job::findOrFail($jobId);
+
+    
+    if ($job->company_id !== $user->company_id) {
+        return response()->json(['message' => 'You can only view applications for your own jobs'], 403);
+    }
+
+    // Get applications with user details
+    $applications = Application::where('job_id', $jobId)
+        ->with('user') // Load the user details
+        ->latest()
+        ->get();
+
+    return response()->json([
+        'applications' => $applications
+    ]);
+}
 }

@@ -5,7 +5,7 @@ import { getXSRFToken } from "../utils/cookies";
 import Navbar from "../components/Navbar";
 
 export default function PostJob() {
-  const { user } = useAuth();
+  useAuth();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -61,7 +61,6 @@ export default function PostJob() {
         throw new Error(data.message || "Failed to post job");
       }
 
-      // Redirect to job details or home
       navigate("/", {
         state: { success: "Job posted successfully!" },
       });
