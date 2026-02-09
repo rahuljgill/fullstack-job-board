@@ -1,22 +1,25 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
-        <p className="text-center mt-12">Loading...</p>
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <p className="text-gray-500 dark:text-gray-400">Loading...</p>
       </div>
     );
   }
 
-  // If not logged in, redirect to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // If logged in, show the page
+  // Logged in but wrong role - redirect to home
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 }

@@ -411,14 +411,14 @@ export default function JobDetails() {
               <div className="mb-8 flex justify-start gap-3">
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                  className="px-6 py-2.5 bg-brand hover:bg-brand-dark text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
                 >
                   Edit Job
                 </button>
                 <button
                   onClick={handleCloseJob}
                   disabled={closing || job.status === "closed"}
-                  className="px-6 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
+                  className="px-6 py-2.5 bg-brand-dark hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md"
                 >
                   {closing
                     ? "Closing..."
@@ -430,7 +430,7 @@ export default function JobDetails() {
             )}
 
             {/* JOB SEEKER VIEW - Apply Button */}
-            {!isMyJob && job.status === "open" && (
+            {!isMyJob && job.status === "active" && (
               <div className="flex justify-end">
                 {user && user.role === "job_seeker" ? (
                   <button

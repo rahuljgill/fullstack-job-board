@@ -340,7 +340,7 @@ export default function Profile() {
                     <button
                       onClick={handleDeleteResume}
                       disabled={deleting}
-                      className="px-4 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      className="px-4 py-1 text-sm bg-brand-dark text-white rounded-md hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       {deleting ? "Deleting..." : "Delete"}
                     </button>

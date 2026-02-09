@@ -13,7 +13,12 @@ import PostJob from "./pages/PostJob";
 function App() {
   return (
     <Routes>
+      {/* Public Routes */}
       <Route path="/" element={<Home />} />
+      <Route path="/job/:id" element={<JobDetails />} />
+      <Route path="/jobs" element={<Jobs />} />
+
+      {/* Guest Only Routes (redirect to home if logged in) */}
       <Route
         path="/login"
         element={
@@ -30,20 +35,22 @@ function App() {
           </GuestRoute>
         }
       />
-      <Route path="/job/:id" element={<JobDetails />} />
-      <Route path="/jobs" element={<Jobs />} />
+
+      {/* Job Seeker Only Routes */}
       <Route
         path="/profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["job_seeker"]}>
             <Profile />
           </ProtectedRoute>
         }
       />
+
+      {/* Company Admin Only Routes */}
       <Route
         path="/employer-profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["company_admin"]}>
             <EmployerProfile />
           </ProtectedRoute>
         }
@@ -52,7 +59,7 @@ function App() {
       <Route
         path="/post-job"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={["company_admin"]}>
             <PostJob />
           </ProtectedRoute>
         }
