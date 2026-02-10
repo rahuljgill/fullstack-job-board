@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
-import { getXSRFToken } from "../utils/cookies";
 
 export default function EmployerProfile() {
   const { user, loading, checkAuth } = useAuth();
@@ -55,13 +54,7 @@ export default function EmployerProfile() {
     setUpdating(true);
 
     try {
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const xsrfToken = getXSRFToken();
+      const token = localStorage.getItem("token");
 
       const formDataToSend = new FormData();
       formDataToSend.append("company_name", formData.company_name);
@@ -73,10 +66,9 @@ export default function EmployerProfile() {
 
       const res = await fetch("http://localhost:8000/api/employer/profile", {
         method: "POST",
-        credentials: "include",
         headers: {
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
+          Authorization: `Bearer ${token}`,
         },
         body: formDataToSend,
       });
@@ -158,7 +150,6 @@ export default function EmployerProfile() {
 
         <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6">
           {!isEditing ? (
-            // View Mode
             <div className="space-y-4">
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -213,7 +204,6 @@ export default function EmployerProfile() {
               </div>
             </div>
           ) : (
-            // Edit Mode
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
@@ -237,7 +227,6 @@ export default function EmployerProfile() {
                   rows="4"
                   value={formData.company_description}
                   onChange={handleChange}
-                  placeholder="Tell us about your company..."
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
               </div>
@@ -249,7 +238,6 @@ export default function EmployerProfile() {
                 <input
                   type="url"
                   name="company_website"
-                  placeholder="https://example.com"
                   value={formData.company_website}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -260,7 +248,7 @@ export default function EmployerProfile() {
                 <button
                   type="submit"
                   disabled={updating}
-                  className="px-6 py-2 bg-brand text-white rounded-md hover:bg-brand-dark disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-6 py-2 bg-brand text-white rounded-md hover:bg-brand-dark disabled:bg-gray-400"
                 >
                   {updating ? "Saving..." : "Save Changes"}
                 </button>
@@ -268,7 +256,7 @@ export default function EmployerProfile() {
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="px-6 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-gray-500"
+                  className="px-6 py-2 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white rounded-md"
                 >
                   Cancel
                 </button>

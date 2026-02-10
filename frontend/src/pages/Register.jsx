@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { getXSRFToken } from "../utils/cookies";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -37,14 +36,6 @@ export default function Register() {
     }
 
     try {
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const xsrfToken = getXSRFToken();
-
       const body = {
         name,
         email,
@@ -62,11 +53,9 @@ export default function Register() {
 
       const res = await fetch("http://localhost:8000/api/register", {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
         },
         body: JSON.stringify(body),
       });

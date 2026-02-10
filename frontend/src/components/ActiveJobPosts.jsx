@@ -10,10 +10,12 @@ export default function ActiveJobPosts() {
   useEffect(() => {
     const fetchMyJobs = async () => {
       try {
+        const token = localStorage.getItem("token");
+
         const res = await fetch("http://localhost:8000/api/my-jobs", {
-          credentials: "include",
           headers: {
             Accept: "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
 

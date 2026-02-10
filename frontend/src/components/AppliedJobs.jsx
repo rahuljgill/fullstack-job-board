@@ -8,10 +8,12 @@ export default function AppliedJobs() {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
+        const token = localStorage.getItem("token");
+
         const res = await fetch("http://localhost:8000/api/applications", {
-          credentials: "include",
           headers: {
             Accept: "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
 

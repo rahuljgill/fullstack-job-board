@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
-import { getXSRFToken } from "../utils/cookies";
 import AppliedJobs from "../components/AppliedJobs";
 
 export default function Profile() {
@@ -72,13 +71,7 @@ export default function Profile() {
     setUpdating(true);
 
     try {
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const xsrfToken = getXSRFToken();
+      const token = localStorage.getItem("token");
 
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
@@ -95,10 +88,9 @@ export default function Profile() {
 
       const res = await fetch("http://localhost:8000/api/profile", {
         method: "POST",
-        credentials: "include",
         headers: {
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
+          Authorization: `Bearer ${token}`,
         },
         body: formDataToSend,
       });
@@ -131,20 +123,13 @@ export default function Profile() {
     setUpdateSuccess("");
 
     try {
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const xsrfToken = getXSRFToken();
+      const token = localStorage.getItem("token");
 
       const res = await fetch("http://localhost:8000/api/profile/resume", {
         method: "DELETE",
-        credentials: "include",
         headers: {
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
+          Authorization: `Bearer ${token}`,
         },
       });
 

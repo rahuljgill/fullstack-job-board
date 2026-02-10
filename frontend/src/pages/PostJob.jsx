@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getXSRFToken } from "../utils/cookies";
 import Navbar from "../components/Navbar";
 
 export default function PostJob() {
@@ -24,12 +23,7 @@ export default function PostJob() {
     setSubmitting(true);
 
     try {
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      const xsrfToken = getXSRFToken();
+      const token = localStorage.getItem("token");
 
       const body = {
         title,
@@ -42,11 +36,10 @@ export default function PostJob() {
 
       const res = await fetch("http://localhost:8000/api/jobs", {
         method: "POST",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(body),
       });

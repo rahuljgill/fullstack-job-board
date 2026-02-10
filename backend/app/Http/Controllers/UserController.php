@@ -46,9 +46,11 @@ class UserController extends Controller
             'company_id' => $companyId,
         ]);
 
+        $token = $user->createToken('auth-token')->plainTextToken;
         return response()->json([
             'message' => 'Registration successful',
-            'user' => $user
+            'user' => $user,
+            'token' => $token
         ], 201);
     }
 
@@ -63,20 +65,23 @@ class UserController extends Controller
     if (!Auth::attempt($credentials)) {
         return response()->json(['message' => 'Invalid credentials'], 401);
     }
+            $user = Auth::user();
 
-    $request->session()->regenerate();
+
+            $token = $user->createToken('auth-token')->plainTextToken;
+
 
     return response()->json([
         'message' => 'Login successful',
-        'user' => Auth::user()
+        'user' => $user,
+        'token' => $token
     ]);
 }
 
 public function logout(Request $request)
 {
-    Auth::guard('web')->logout();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+            $request->user()->tokens()->delete();
+
 
     return response()->json(['message' => 'Logged out successfully']);
 }

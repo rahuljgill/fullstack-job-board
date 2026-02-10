@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { getXSRFToken } from "../utils/cookies";
 
 const AuthContext = createContext();
 
@@ -20,20 +19,32 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAuth = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch("http://localhost:8000/api/me", {
-        credentials: "include",
-        headers: { Accept: "application/json" },
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
       } else {
+        localStorage.removeItem("token");
         setUser(null);
       }
     } catch (error) {
       console.error("Auth check failed", error);
+      localStorage.removeItem("token");
       setUser(null);
     } finally {
       setLoading(false);
@@ -41,13 +52,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (email, password) => {
-    await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-      credentials: "include",
-    });
-
     const res = await fetch("http://localhost:8000/api/login", {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -60,33 +66,29 @@ export const AuthProvider = ({ children }) => {
       throw new Error(data.message || "Login failed");
     }
 
+    const data = await res.json();
+    localStorage.setItem("token", data.token);
+
     await checkAuth();
   };
 
   const logout = async () => {
+    const token = localStorage.getItem("token");
+
     try {
-      // Get fresh CSRF token before logout
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const xsrfToken = getXSRFToken();
-
       await fetch("http://localhost:8000/api/logout", {
         method: "POST",
-        credentials: "include",
         headers: {
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
+          Authorization: `Bearer ${token}`,
         },
       });
 
+      localStorage.removeItem("token");
       setUser(null);
     } catch (error) {
       console.error("Logout failed", error);
-
+      localStorage.removeItem("token");
       setUser(null);
     }
   };

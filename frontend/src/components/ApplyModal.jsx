@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { getXSRFToken } from "../utils/cookies";
 
 export default function ApplyModal({ job, isOpen, onClose, onSuccess }) {
   const [coverLetter, setCoverLetter] = useState("");
@@ -14,12 +13,7 @@ export default function ApplyModal({ job, isOpen, onClose, onSuccess }) {
     setSubmitting(true);
 
     try {
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      const xsrfToken = getXSRFToken();
+      const token = localStorage.getItem("token");
 
       const formData = new FormData();
       formData.append("job_id", job.id);
@@ -31,10 +25,9 @@ export default function ApplyModal({ job, isOpen, onClose, onSuccess }) {
 
       const res = await fetch("http://localhost:8000/api/applications", {
         method: "POST",
-        credentials: "include",
         headers: {
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
@@ -103,7 +96,6 @@ export default function ApplyModal({ job, isOpen, onClose, onSuccess }) {
             </label>
 
             <div className="space-y-3">
-              {/* Use default resume option */}
               <label className="flex items-center">
                 <input
                   type="radio"
@@ -116,7 +108,6 @@ export default function ApplyModal({ job, isOpen, onClose, onSuccess }) {
                 </span>
               </label>
 
-              {/* Upload custom resume option */}
               <label className="flex items-center">
                 <input
                   type="radio"
@@ -129,7 +120,6 @@ export default function ApplyModal({ job, isOpen, onClose, onSuccess }) {
                 </span>
               </label>
 
-              {/* File input (only shown if uploading custom) */}
               {!useDefaultResume && (
                 <input
                   type="file"

@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import ApplyModal from "../components/ApplyModal";
-import { getXSRFToken } from "../utils/cookies";
 
 export default function JobDetails() {
   const { id } = useParams();
@@ -76,11 +75,15 @@ export default function JobDetails() {
 
   const checkIfApplied = async () => {
     try {
+      const token = localStorage.getItem("token");
+
       const res = await fetch(
         `http://localhost:8000/api/applications/check/${id}`,
         {
-          credentials: "include",
-          headers: { Accept: "application/json" },
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
       );
       if (res.ok) {
@@ -95,11 +98,15 @@ export default function JobDetails() {
   const fetchApplications = async () => {
     setLoadingApplications(true);
     try {
+      const token = localStorage.getItem("token");
+
       const res = await fetch(
         `http://localhost:8000/api/jobs/${id}/applications`,
         {
-          credentials: "include",
-          headers: { Accept: "application/json" },
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
       );
       if (res.ok) {
@@ -132,20 +139,14 @@ export default function JobDetails() {
     setError("");
 
     try {
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      const xsrfToken = getXSRFToken();
+      const token = localStorage.getItem("token");
 
       const res = await fetch(`http://localhost:8000/api/jobs/${id}`, {
         method: "PUT",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(editFormData),
       });
@@ -172,19 +173,13 @@ export default function JobDetails() {
     setError("");
 
     try {
-      await fetch("http://localhost:8000/sanctum/csrf-cookie", {
-        credentials: "include",
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      const xsrfToken = getXSRFToken();
+      const token = localStorage.getItem("token");
 
       const res = await fetch(`http://localhost:8000/api/jobs/${id}/close`, {
         method: "PATCH",
-        credentials: "include",
         headers: {
           Accept: "application/json",
-          "X-XSRF-TOKEN": xsrfToken,
+          Authorization: `Bearer ${token}`,
         },
       });
 
