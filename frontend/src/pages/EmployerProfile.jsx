@@ -64,14 +64,17 @@ export default function EmployerProfile() {
       );
       formDataToSend.append("company_website", formData.company_website);
 
-      const res = await fetch("http://localhost:8000/api/employer/profile", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/employer/profile`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: formDataToSend,
         },
-        body: formDataToSend,
-      });
+      );
 
       const data = await res.json();
 

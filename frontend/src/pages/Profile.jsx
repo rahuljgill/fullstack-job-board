@@ -86,7 +86,7 @@ export default function Profile() {
         formDataToSend.append("resume", resumeFile);
       }
 
-      const res = await fetch("http://localhost:8000/api/profile", {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/profile`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -125,13 +125,16 @@ export default function Profile() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:8000/api/profile/resume", {
-        method: "DELETE",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/profile/resume`,
+        {
+          method: "DELETE",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       const data = await res.json();
 
@@ -315,7 +318,7 @@ export default function Profile() {
                 {user.default_resume_url ? (
                   <div className="flex items-center gap-4">
                     <a
-                      href={`http://localhost:8000/storage/${user.default_resume_url}`}
+                      href={user.default_resume_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-brand hover:underline"
@@ -449,7 +452,7 @@ export default function Profile() {
                 {user.default_resume_url && !resumeFile && (
                   <div className="mb-2">
                     <a
-                      href={`http://localhost:8000/storage/${user.default_resume_url}`}
+                      href={user.default_resume_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-brand hover:underline text-sm"

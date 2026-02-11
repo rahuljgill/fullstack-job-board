@@ -19,7 +19,7 @@ export default function Jobs() {
   const [days, setDays] = useState(searchParams.get("days") || "");
 
   useEffect(() => {
-    const url = `http://localhost:8000/api/jobs?${searchParams.toString()}`;
+    const url = `${import.meta.env.VITE_API_BASE}/api/jobs?${searchParams.toString()}`;
 
     setLoading(true);
     fetch(url)

@@ -23,14 +23,17 @@ export default function ApplyModal({ job, isOpen, onClose, onSuccess }) {
         formData.append("resume", resumeFile);
       }
 
-      const res = await fetch("http://localhost:8000/api/applications", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/applications`,
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
         },
-        body: formData,
-      });
+      );
 
       const data = await res.json();
 

@@ -52,12 +52,14 @@ public function store(Request $request)
 
     $resumeUrl = null;
 
-    if ($request->hasFile('resume')) {
-        $path = $request->file('resume')->store('applications', 'public');
-        $resumeUrl = $path;
-    } else {
-        $resumeUrl = $user->default_resume_url;
-    }
+
+if ($request->hasFile('resume')) {
+    $path = $request->file('resume')->store('resumes', 'public');
+    $resumeUrl = $path; 
+} else {
+
+    $resumeUrl = $user->getRawOriginal('default_resume_url');
+}
 
     $application = Application::create([
         'user_id' => $user->id,
@@ -67,17 +69,16 @@ public function store(Request $request)
         'status' => 'applied',
     ]);
 
-    
     $application->load('job.company');
 
-    
-    Mail::to($user->email)->send(new ApplicationSubmitted($application, $user));
+    //Mail::to($user->email)->send(new ApplicationSubmitted($application, $user));
 
     return response()->json([
         'message' => 'Application submitted successfully',
         'application' => $application
     ], 201);
 }
+
 
 public function checkIfApplied(Request $request, $jobId)
     {

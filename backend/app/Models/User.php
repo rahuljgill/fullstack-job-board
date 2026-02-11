@@ -42,6 +42,16 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+      public function getDefaultResumeUrlAttribute($value)
+    {
+        if (!$value) {
+            return null;
+        }
+        
+        // Return full URL for production
+        return url('storage/' . $value);
+    }
+
     /**
      * The attributes that should be cast.
      *

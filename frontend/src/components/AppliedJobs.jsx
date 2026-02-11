@@ -10,12 +10,15 @@ export default function AppliedJobs() {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch("http://localhost:8000/api/applications", {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
+        const res = await fetch(
+          `${import.meta.env.VITE_API_BASE}/api/applications`,
+          {
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
           },
-        });
+        );
 
         if (res.ok) {
           const data = await res.json();

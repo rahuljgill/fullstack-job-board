@@ -17,6 +17,16 @@ class Application extends Model
         'resume_url',
     ];
 
+    // In app/Models/Application.php
+public function getResumeUrlAttribute($value)
+{
+    if (!$value) {
+        return null;
+    }
+    
+    return url('storage/' . $value);
+}
+
     // Relationships
     public function user()
     {

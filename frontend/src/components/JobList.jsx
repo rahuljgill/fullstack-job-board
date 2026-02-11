@@ -7,7 +7,7 @@ export default function JobList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/jobs")
+    fetch(`${import.meta.env.VITE_API_BASE}/api/jobs`)
       .then((res) => res.json())
       .then((data) => {
         setJobs(data);

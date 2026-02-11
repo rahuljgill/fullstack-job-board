@@ -40,7 +40,9 @@ export default function JobDetails() {
 
   const fetchJob = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/jobs/${id}`);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/jobs/${id}`,
+      );
       if (!res.ok) throw new Error("Job not found");
       const data = await res.json();
       setJob(data);
@@ -78,7 +80,7 @@ export default function JobDetails() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:8000/api/applications/check/${id}`,
+        `${import.meta.env.VITE_API_BASE}/api/applications/check/${id}`,
         {
           headers: {
             Accept: "application/json",
@@ -101,7 +103,7 @@ export default function JobDetails() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:8000/api/jobs/${id}/applications`,
+        `${import.meta.env.VITE_API_BASE}/api/jobs/${id}/applications`,
         {
           headers: {
             Accept: "application/json",
@@ -141,15 +143,18 @@ export default function JobDetails() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:8000/api/jobs/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/jobs/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(editFormData),
         },
-        body: JSON.stringify(editFormData),
-      });
+      );
 
       const data = await res.json();
 
@@ -175,13 +180,16 @@ export default function JobDetails() {
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:8000/api/jobs/${id}/close`, {
-        method: "PATCH",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/jobs/${id}/close`,
+        {
+          method: "PATCH",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       const data = await res.json();
 
@@ -527,7 +535,7 @@ export default function JobDetails() {
                     {app.resume_url && (
                       <div className="mt-4">
                         <a
-                          href={`http://localhost:8000/storage/${app.resume_url}`}
+                          href={app.resume_url}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center px-4 py-2 bg-brand text-white rounded-md hover:bg-brand-dark text-sm"

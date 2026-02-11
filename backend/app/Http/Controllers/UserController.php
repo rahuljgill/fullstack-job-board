@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+
+
+
     public function register(Request $request)
     {
         $validated = $request->validate([
