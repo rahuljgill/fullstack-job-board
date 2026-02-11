@@ -53,14 +53,23 @@ export default function Navbar() {
         <div className="flex items-center gap-4">
           {user ? (
             <>
-              {/* Logged in - show Profile and Logout */}
+              {/* Logged in - Desktop: "Hi, username" / Mobile: "Profile" link */}
               <Link
                 to={
                   user.role === "job_seeker" ? "/profile" : "/employer-profile"
                 }
-                className="text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand"
+                className="hidden sm:block text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand"
               >
                 Hi, {user.name}!
+              </Link>
+
+              <Link
+                to={
+                  user.role === "job_seeker" ? "/profile" : "/employer-profile"
+                }
+                className="sm:hidden text-text-primary dark:text-gray-200 hover:text-brand dark:hover:text-brand"
+              >
+                Profile
               </Link>
 
               <button
