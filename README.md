@@ -177,18 +177,6 @@ jobBoard/
 └── README.md
 ```
 
-## Prerequisites
-
-- Node.js 18+ and npm
-- PHP 8.1+
-- Composer (for PHP dependency management)
-- SQLite, MySQL, or PostgreSQL (database)
-- Git
-
-## Local Development (Optional)
-
-This project is intended as a portfolio demonstration and is deployed live. If you wish to run it locally, basic setup is required for both the Laravel backend and React frontend.
-
 ## API Documentation
 
 All API endpoints are prefixed with `/api/` and require authentication via Laravel Sanctum (except login/register).
